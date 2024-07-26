@@ -313,7 +313,9 @@ qemuProcessHandleMonitorEOF(qemuMonitorPtr mon ATTRIBUTE_UNUSED,
     /* We don't want this EOF handler to be called over and over while the
      * thread is waiting for a job.
      */
+    virObjectLock(mon);
     qemuMonitorUnregister(mon);
+    virObjectUnlock(mon);
 
  cleanup:
     virObjectUnlock(vm);
