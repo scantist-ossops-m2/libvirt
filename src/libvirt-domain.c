@@ -10976,6 +10976,7 @@ virDomainGetTime(virDomainPtr dom,
     virResetLastError();
 
     virCheckDomainReturn(dom, -1);
+    virCheckReadOnlyGoto(dom->conn->flags, error);
 
     if (dom->conn->driver->domainGetTime) {
         int ret = dom->conn->driver->domainGetTime(dom, seconds,
