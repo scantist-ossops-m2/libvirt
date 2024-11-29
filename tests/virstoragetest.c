@@ -593,6 +593,7 @@ testBackingParse(const void *args)
     g_autoptr(virStorageSource) src = NULL;
     int rc;
     int erc = data->rv;
+    unsigned int xmlformatflags = VIR_DOMAIN_DEF_FORMAT_SECURE;
 
     /* expect failure return code with NULL expected data */
     if (!data->expect)
@@ -612,7 +613,7 @@ testBackingParse(const void *args)
         return -1;
     }
 
-    if (virDomainDiskSourceFormat(&buf, src, "source", 0, false, 0, true, NULL) < 0 ||
+    if (virDomainDiskSourceFormat(&buf, src, "source", 0, false, xmlformatflags, true, NULL) < 0 ||
         !(xml = virBufferContentAndReset(&buf))) {
         fprintf(stderr, "failed to format disk source xml\n");
         return -1;
