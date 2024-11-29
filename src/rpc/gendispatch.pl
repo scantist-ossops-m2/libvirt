@@ -1709,16 +1709,21 @@ elsif ($mode eq "client") {
             my @acl;
             foreach (@{$acl}) {
                 my @bits = split /:/;
-                push @acl, { object => $bits[0], perm => $bits[1], flags => $bits[2] }
+                push @acl, { object => $bits[0], perm => $bits[1], flags => $bits[2],
+                             param => $bits[3], value => $bits[4] }
             }
 
             my $checkflags = 0;
+            my $paramtocheck = undef;
             for (my $i = 1 ; $i <= $#acl ; $i++) {
                 if ($acl[$i]->{object} ne $acl[0]->{object}) {
                     die "acl for '$call->{ProcName}' cannot check different objects";
                 }
                 if (defined $acl[$i]->{flags}) {
                     $checkflags = 1;
+                }
+                if (defined $acl[$i]->{param}) {
+                    $paramtocheck = $acl[$i]->{param};
                 }
             }
 
@@ -1752,6 +1757,9 @@ elsif ($mode eq "client") {
             }
             if ($checkflags) {
                 push @argdecls, "unsigned int flags";
+            }
+            if (defined $paramtocheck) {
+                push @argdecls, "unsigned int " . $paramtocheck;
             }
 
             my $ret;
@@ -1808,6 +1816,17 @@ elsif ($mode eq "client") {
                             print "((flags & ($flags)) == 0) &&\n";
                         } else {
                             print "((flags & ($flags)) == ($flags)) &&\n";
+                        }
+                        print "        ";
+                    }
+                    if (defined $acl->{param}) {
+                        my $param = $acl->{param};
+                        my $value = $acl->{value};
+                        if ($value =~ /^\!/) {
+                            $value = substr $value, 1;
+                            print "($param != ($value)) &&\n";
+                        } else {
+                            print "($param == ($value)) &&\n";
                         }
                         print "        ";
                     }
